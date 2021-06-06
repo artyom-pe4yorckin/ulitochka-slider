@@ -1,7 +1,7 @@
 # ulitochka-slider
 slider for websites
-Just add "ulitochka" class and slider will be done.
-You also can customize some parameters with attributes:
+<p>Just add "ulitochka" class and slider will be done.</p>
+<p>You also can customize some parameters with attributes:</p>
 <table>
 	<thead>
 		<tr>
