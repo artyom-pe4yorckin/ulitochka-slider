@@ -118,13 +118,6 @@ function ready(){
     for(let a of slidersarrows){
         a.addEventListener("pointerup", ulitochkaSlide);
     }
-    //автослайдер
-    /*
-    1) каждые 100мс проходим по всем автослайдерам и проверяем не пора ли их слайдить — хуйня какая то
-    2) Создать тег <script> и вставить туда setInterval(function(this), interval) для каждого автослайдера — код в теге script, вставленный через innerHTML не выполнится по соображениям безопасности
-    3) написать функцию автослайда и писать свой setInterval для каждого блока с нужными задержками
-    */
-    //let a = setInterval(ulitochkaSlide.bind(sliders[0]), 1000, "left", true);
 
     window.addEventListener("resize", ()=>{
       for (let s of sliders){
@@ -171,10 +164,6 @@ function setArrClass(elem){
 //слайдер по кнопкам
 function ulitochkaSlide(){
     let direction = this.getAttribute("direction");
-    /*
-    Если нет обёртки стрелок то слайдер =  parentNode
-    иначе слайдер =  parentNode.parentNode
-    */
     let slider = this.closest(".ulitochka");
     let slides = slider.querySelectorAll(".ulitochka-slide-wrapper>*");
     if(slides.length==0) return;
@@ -265,7 +254,6 @@ function setSlideWidth(elem){
     */
     console.log(wrapper.offsetWidth, wrapper.clientWidth)
     elem.style.setProperty("--ulitochka-slide-width", `${(wrapper.offsetWidth - gap*cnt + gap)/cnt}px`);
-    //wrapper.style.setProperty("--ulitochka-slide-width", `calc((100% - ${gap*cnt}px + ${gap}px)/${cnt})`);
 }
 
 //адаптив (возвращает сколько показывать сейчас слайдов и высоту слайда)
@@ -320,7 +308,6 @@ function ulitochkaDragSlide(e){
     }
     e.preventDefault();
     if(e.target.classList.contains("ulitochka-arrow") || e.target.classList.contains("dot")){
-        //ulitochkaSlide.call(e.target);
         return;
     }
     let appear = false;
