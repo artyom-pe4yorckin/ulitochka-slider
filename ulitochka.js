@@ -8,7 +8,6 @@
    + листается ли слайдер перетаскиванием на десктопе — ulitochka-drag="true|false"
    + автослайд — setInterval(ulitochkaSlide.bind(sliders[0]), 1000, "left", true);
    + открытие картинок в фул размере и слайдить их в таком виде — ulitochka-hirez="[классы левой стрелки], [классы правой стрелки], [классы кнопки закрытия], wrap", чтобы пропустить элемент указать "[]"
-   - добавлять id/class слайдерам — это можно и так сделать
    + добавлять классы стрелкам — ulitochka-arrow-class="[left] [right]"
    + точки для перехода к слайдам — ulitochka-dots="dot|accumulate"
    */
@@ -23,18 +22,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
 window.addEventListener("load", ready);
 function ready(){
-  /*
-  Получить список всех сладеров где задана адаптивность
-  записать их адаптивы в массив
-  обращаться к конкретному слайдеру при ресайзе по его порядковому номеру в массиве
-  */
     let sliders = document.querySelectorAll(".ulitochka");
     if(sliders.length==0) return;
     let hirezOverlay = `<div id="ulitochka-hirez-overlay">
         <button class="ulitochka-close"></button>
         <div class="ulitochka">
-            <span direction="left" class="ulitochka-arrow"></span>
-            <span direction="right" class="ulitochka-arrow"></span>
+            <button direction="left" class="ulitochka-arrow"></button>
+            <button direction="right" class="ulitochka-arrow"></button>
             <div class="ulitochka-slide-wrapper"></div>
         </div>
     </div>`;
@@ -50,10 +44,9 @@ function ready(){
         overlay.classList.remove("active");
     }
     overlaySlider.addEventListener("pointerdown", ulitochkaDragSlide);
-    let autoSliders = [];
     let slidersarrows;
-    let arrows = `<span direction="left" class="ulitochka-arrow"></span>
-                <span direction="right" class="ulitochka-arrow"></span>`;
+    let arrows = `<button direction="left" class="ulitochka-arrow"></button>
+                <button direction="right" class="ulitochka-arrow"></button>`;
     //создаем верстку слайдеров
     for (let s of sliders) {
         let wrapper = document.createElement('div');
@@ -83,14 +76,12 @@ function ready(){
         }
         if(animation=="shift"){
             s.classList.add("ulitochka-shift");
-            for(let i=0;i<cnt;i++){
-                slides[i].classList.add("active-slide");
-            }
         }else if(animation=="appear"){
             s.classList.add("ulitochka-appear");
-            for(let i=0;i<cnt;i++){
-                slides[i].classList.add("active-slide");
-            }
+        }
+        let cs = Math.min(cnt, slides.length);
+        for(let i=0;i<cs;i++){
+            slides[i].classList.add("active-slide");
         }
         setArrClass(s);
         if(s.hasAttribute("ulitochka-dots")){
@@ -100,7 +91,8 @@ function ready(){
                 dotsBlock.insertAdjacentHTML("beforeEnd", `<div class='dot' slide="${i}"></div>`);
             }
             let dots = s.querySelectorAll(".ulitochka-dots>*");
-            for(let i=0;i<cntToShow(s)[0];i++){
+            let cs = Math.min(cntToShow(s)[0], slides.length);
+            for(let i=0;i<cs;i++){
                 dots[i].classList.add("ulitochka-active-dot");
             }
             for(let d of dots){
@@ -120,20 +112,20 @@ function ready(){
     }
 
     window.addEventListener("resize", ()=>{
-      for (let s of sliders){
+      for(let s of sliders){
         setSlideWidth(s);
         s.setAttribute("ulitochka-active-slide", "0");
         let showSlide = cntToShow(s);
         s.style.setProperty("--ulitochka-slide-height", showSlide[1])
-        //console.log(showSlide);
         let slides = s.querySelectorAll(".ulitochka-slide-wrapper>*");
         let hasDots = s.hasAttribute("ulitochka-dots");
         let dots = s.querySelectorAll(".ulitochka-dots>*");
+        let cs = Math.min(showSlide[0], slides.length);
         for(let i=0;i<slides.length;i++){
           slides[i].classList.remove("active-slide");
           if(hasDots) dots[i].classList.remove("ulitochka-active-dot");
         }
-        for(let i=0;i<showSlide[0];i++){
+        for(let i=0;i<cs;i++){
           slides[i].classList.add("active-slide");
           if(hasDots) dots[i].classList.add("ulitochka-active-dot");
         }
@@ -163,17 +155,16 @@ function setArrClass(elem){
 
 //слайдер по кнопкам
 function ulitochkaSlide(){
-    let direction = this.getAttribute("direction");
     let slider = this.closest(".ulitochka");
     let slides = slider.querySelectorAll(".ulitochka-slide-wrapper>*");
-    if(slides.length==0) return;
-    let activeSlide = +slider.getAttribute("ulitochka-active-slide");
-    //определяем сколько слайдов показывать
     let cntShow = cntToShow(slider)[0];
+    if(slides.length<cntShow) return;
+    let direction = this.getAttribute("direction");
+    let activeSlide = +slider.getAttribute("ulitochka-active-slide");
     slides[activeSlide].classList.remove("active-slide");
     if(direction=="left"){
         activeSlide = activeSlide-1<0 ? slides.length-cntShow : activeSlide-1;
-    }else{
+    }else if(direction=="right"){
         activeSlide = activeSlide+1>slides.length-cntShow ? 0 : activeSlide+1;
     }
     shiftSlide(activeSlide, slider);
@@ -199,14 +190,12 @@ function shiftSlide(activeSlide, slider){
     }
     slidesWrapper.style.transform = `translateX(${-activeSlide*(slideWidth+gap)}px)`;
     if(anim=="shift"){
-        //console.log(cntShow)
         let lastShow = activeSlide+cntShow>slides.length ? cntShow : activeSlide+cntShow;
         let start =  activeSlide;
         for(let i=start;i<lastShow;i++){
             slides[i].classList.add("active-slide");
         }
     }else if(anim=="appear"){
-        //console.log(activeSlide, activeSlide+cntShow);
         let start = activeSlide;
         for(let i=start;i<activeSlide+cntShow;i++){
             slides[i].classList.add("active-slide");
@@ -226,9 +215,10 @@ function shiftSlide(activeSlide, slider){
 
 //слайдер по точкам
 function dotsSlide(){
-    let activeSlide = this.getAttribute("slide");
     let slider = this.closest(".ulitochka");
     let slides = slider.querySelectorAll(".ulitochka-slide-wrapper>*");
+    if(slides.length<cntToShow(slider)[0]) return;
+    let activeSlide = this.getAttribute("slide");
     if(+activeSlide+cntToShow(slider)[0]>slides.length) return;
     shiftSlide(activeSlide, slider);
 }
@@ -252,8 +242,8 @@ function setSlideWidth(elem){
     cnt*sw + gw*cnt - gw = w
     sw = (w - gw*cnt + gw)/cnt
     */
-    console.log(wrapper.offsetWidth, wrapper.clientWidth)
     elem.style.setProperty("--ulitochka-slide-width", `${(wrapper.offsetWidth - gap*cnt + gap)/cnt}px`);
+    //wrapper.style.setProperty("--ulitochka-slide-width", `calc((100% - ${gap*cnt}px + ${gap}px)/${cnt})`);
 }
 
 //адаптив (возвращает сколько показывать сейчас слайдов и высоту слайда)
@@ -303,13 +293,8 @@ function descendingSort(a,b){
 */
 //драг слайдер
 function ulitochkaDragSlide(e){
-    if(e.target.tagName=="A"){
-        return;
-    }
+    if(e.target.classList.contains("ulitochka-arrow") || e.target.classList.contains("dot") || e.target.tagName=="A") return;
     e.preventDefault();
-    if(e.target.classList.contains("ulitochka-arrow") || e.target.classList.contains("dot")){
-        return;
-    }
     let appear = false;
     if(this.getAttribute("ulitochka-animation")=="appear"){
         appear = true;
@@ -322,7 +307,7 @@ function ulitochkaDragSlide(e){
     let hasdots = this.closest(".ulitochka[ulitochka-dots]")!=null;
     let cntShow = cntToShow(this)[0];
     let slides = this.querySelectorAll(".ulitochka-slide-wrapper>*");
-    if(slides.length==0) return;
+    if(slides.length<cntShow) return;
     let translate = window.getComputedStyle(slidesWrapper).transform=="none" ? 0 : +window.getComputedStyle(slidesWrapper).transform.match(/-?\d+/g)[4];
     let gap = +window.getComputedStyle(slides[0]).marginRight.match(/\d+/)[0];
     gap == null ? 0 : gap;
