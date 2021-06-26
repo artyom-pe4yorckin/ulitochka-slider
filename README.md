@@ -75,3 +75,4 @@ slider for websites
 <p><b>selector</b> must choose block with class="ulitochka"</p>
 <p><b>delay</b> set in milliseconds</p>
 <p><b>direction</b> should be equal "left" or "right"</p>
+<p>If you want add some style to active slide active-slide</p>
