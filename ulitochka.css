@@ -70,7 +70,7 @@
     grid-template-areas: 'slides';
     align-items: center;
     grid-auto-rows: 50px;
-    touch-action: none;
+    touch-action: pan-y;
 }
 .ulitochka[ulitochka-dots]{
     grid-template-rows: auto 50px;
